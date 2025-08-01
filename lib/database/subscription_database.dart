@@ -1,15 +1,14 @@
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:renewed/models/subscription.dart';
+import 'package:renewed/database/notification_service.dart';
+import 'package:renewed/database/subscription.dart';
 
 class SubscriptionDatabase {
-
   static final SubscriptionDatabase instance = SubscriptionDatabase._internal();
 
   static late Isar isar;
 
   SubscriptionDatabase._internal();
-
 
   static Future<void> initialize() async {
     final dir = await getApplicationDocumentsDirectory();
@@ -37,6 +36,7 @@ class SubscriptionDatabase {
     await isar.writeTxn(() async {
       await isar.subscriptions.put(subscription);
     });
+    await NotificationService().scheduleSubscriptionNotification(subscription);
   }
 
   Future<List<Subscription>> getAllSubscriptions() async {
@@ -44,6 +44,7 @@ class SubscriptionDatabase {
   }
 
   Future<void> deleteSubscription(int id) async {
+    await NotificationService().cancelSubscriptionNotification(id);
     await isar.writeTxn(() async {
       await isar.subscriptions.delete(id);
     });
@@ -52,6 +53,7 @@ class SubscriptionDatabase {
   Future<void> updateReminder(int id) async {
     final subscription = await isar.subscriptions.get(id);
     if (subscription != null) {
+      await NotificationService().cancelSubscriptionNotification(id);
       subscription.nextReminder = subscription.startDate.add(
         Duration(days: subscription.intervalInDays),
       );
@@ -59,6 +61,9 @@ class SubscriptionDatabase {
       await isar.writeTxn(() async {
         await isar.subscriptions.put(subscription);
       });
+      await NotificationService().scheduleSubscriptionNotification(
+        subscription,
+      );
     }
   }
 
