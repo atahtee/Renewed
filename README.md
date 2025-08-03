@@ -38,3 +38,13 @@ Make sure you have the following installed:
 3. Run the app
    ```bash
    flutter run
+
+
+ ## Contributing
+
+Contributions are welcome! To contribute:
+1. Fork the repo
+2. Create your feature branch: `git checkout -b feature/YourFeature`
+3. Commit your changes: `git commit -m 'Add: Your feature'`
+4. Push to the branch: `git push origin feature/YourFeature`
+5. Open a pull request
