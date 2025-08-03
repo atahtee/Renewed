@@ -2,16 +2,16 @@
 
 **Renewed** is a sleek and intuitive Flutter app designed to help you effortlessly track your active subscriptions, monitor costs, and stay on top of renewal dates. Never miss a payment or waste money on forgotten services again!
 
-## ✨ Features
+##  Features
 
-- **📆 Subscription Management** – Easily add, edit, and organize your subscriptions
-- **💰 Cost Tracking** – Monitor monthly/annual spending per subscription
-- **⏳ Renewal Cycles** – View renewal intervals (weekly, monthly, yearly) at a glance
-- **🔔 (Coming Soon) Smart Notifications** – Get alerts before renewal dates
-- **🌙 Dark Mode** – Enjoy a comfortable viewing experience day or night
-- **🔐 Secure & Offline-First** – Your data stays private and accessible anytime
+-  Subscription Management** – Easily add, edit, and organize your subscriptions
+-  Cost Tracking** – Monitor monthly/annual spending per subscription
+-  Renewal Cycles** – View renewal intervals (weekly, monthly, yearly) at a glance
+-  (Coming Soon) Smart Notifications** – Get alerts before renewal dates
+-  Dark Mode** – Enjoy a comfortable viewing experience day or night
+-  Secure & Offline-First** – Your data stays private and accessible anytime
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 - Flutter SDK (latest stable version)
@@ -56,13 +56,6 @@ Push to the branch:
 sh
 git push origin feature/YourFeature
 Open a pull request
-
-📄 License
-Distributed under the MIT License. See LICENSE file for more information.
-
-Developed with ❤️ by [Your Name]
-
-text
 
 Key notes:
 1. All sections are properly consolidated in one markdown file

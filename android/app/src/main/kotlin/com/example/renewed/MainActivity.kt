@@ -1,4 +1,4 @@
-package com.example.renewed
+package com.renewed.app
 
 import io.flutter.embedding.android.FlutterActivity
 
