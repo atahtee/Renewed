@@ -32,7 +32,9 @@ Make sure you have the following installed:
    cd renewed
 
 2. Install dependencies
-   ```flutter pub get
+   ```bash
+   flutter pub get
 
 3. Run the app
-   ``` flutter run
+   ```bash
+   flutter run
