@@ -1,6 +1,6 @@
 #  Renewed
 
-**Renewed** is a sleek, intuitive Flutter app built to help you **track subscriptions, monitor spending**, and **stay ahead of renewal dates**. Say goodbye to surprise charges and forgotten services — stay in control of your recurring expenses with ease.
+**Renewed** is a mobile app that allows you to see subscriptions just before they are auto renewed. It also includes subcription management and cost tracking.
 
 ---
 
@@ -10,7 +10,6 @@
 - **Cost Tracking** – View your monthly or annual spending at a glance.
 - **Renewal Cycles** – Weekly, monthly, or yearly — you’ll always know what’s due and when.
 - **Smart Notifications** – Get timely reminders before renewals hit your wallet.
-- **Dark Mode** – Because your eyes deserve a break too.
 - **Secure & Offline-First** – Your data stays private and accessible — even without an internet connection.
 
 ---
