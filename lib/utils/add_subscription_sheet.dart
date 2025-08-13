@@ -387,10 +387,9 @@ class AddSubscriptionSheet {
                                       Navigator.pop(context);
                                       onSubscriptionAdded();
 
-                                      // Show success message
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
-                                          content: Text('✅ ${nameController.text} added successfully!'),
+                                          content: Text('${nameController.text} added successfully!'),
                                           backgroundColor: Colors.green,
                                           behavior: SnackBarBehavior.floating,
                                         ),
@@ -398,7 +397,7 @@ class AddSubscriptionSheet {
                                     } catch (e) {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
-                                          content: Text('❌ Failed to add subscription: $e'),
+                                          content: Text('Failed to add subscription: $e'),
                                           backgroundColor: Colors.red,
                                           behavior: SnackBarBehavior.floating,
                                         ),
