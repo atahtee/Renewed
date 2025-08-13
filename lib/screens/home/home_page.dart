@@ -131,14 +131,35 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: subscriptions.length,
-                    itemBuilder: (context, index) {
-                      final sub = subscriptions[index];
-                      return _buildSubscriptionCard(sub);
-                    },
-                  ),
+                  child: subscriptions.isEmpty
+                      ? const Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.event_busy,
+                                size: 48,
+                                color: Colors.black54,
+                              ),
+                              const SizedBox(height: 16,),
+                              const Text('No upcoming payments',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.black54,
+                                fontWeight: FontWeight.w500
+                              ),
+                              )
+                            ],
+                          )
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          itemCount: subscriptions.length,
+                          itemBuilder: (context, index) {
+                            final sub = subscriptions[index];
+                            return _buildSubscriptionCard(sub);
+                          },
+                        ),
                 ),
               ],
             ),
