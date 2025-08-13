@@ -142,24 +142,28 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
   }
 
   Future<void> _checkPermissionStatusOnResume() async {
+    final prefs = await SharedPreferences.getInstance();
     final status = await _notificationService.checkPermissionStatus();
 
     if (status == NotificationPermissionStatus.granted) {
-      // Reschedule notifications if permission was just granted
       final db = SubscriptionDatabase.instance;
       final subscriptions = await db.getAllSubscriptions();
       await _notificationService.rescheduleAllNotifications(subscriptions);
 
-      if (mounted) {
+      final hasShownEnabledMessage =
+          prefs.getBool('hasShownEnabledMessage') ?? false;
+
+      if (!hasShownEnabledMessage && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-              '✅ Notifications enabled! Your reminders are now active.',
+              'Notifications enabled! Your reminders are now active.',
             ),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
           ),
         );
+        await prefs.setBool('hasShownEnabledMessage', true);
       }
     }
   }
