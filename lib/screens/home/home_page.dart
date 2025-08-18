@@ -53,22 +53,19 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(
-          'My Subscriptions',
-          style: TextStyle(
-            color: Colors.black87,
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
+                Container(
+                  margin: const EdgeInsets.all(30),
+                  padding: const EdgeInsets.only(top: 20),
+                  child: Text('My Subscriptions', style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold
+                  ),),
+                ),
                 Container(
                   margin: const EdgeInsets.all(16),
                   padding: const EdgeInsets.all(20),
@@ -141,16 +138,17 @@ class _HomePageState extends State<HomePage> {
                                 size: 48,
                                 color: Colors.black54,
                               ),
-                              const SizedBox(height: 16,),
-                              const Text('No upcoming payments',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.black54,
-                                fontWeight: FontWeight.w500
+                              const SizedBox(height: 16),
+                              const Text(
+                                'No upcoming payments',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.black54,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                              )
                             ],
-                          )
+                          ),
                         )
                       : ListView.builder(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
