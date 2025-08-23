@@ -21,7 +21,8 @@ class NotificationService {
   NotificationService._internal();
 
   late FlutterLocalNotificationsPlugin _notificationsPlugin;
-  NotificationPermissionStatus _permissionStatus = NotificationPermissionStatus.unknown;
+  NotificationPermissionStatus _permissionStatus =
+      NotificationPermissionStatus.unknown;
 
   NotificationPermissionStatus get permissionStatus => _permissionStatus;
 
@@ -35,21 +36,20 @@ class NotificationService {
 
     const DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+          requestAlertPermission: true,
+          requestBadgePermission: true,
+          requestSoundPermission: true,
+        );
 
     const InitializationSettings initializationSettings =
         InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsIOS,
-    );
+          android: initializationSettingsAndroid,
+          iOS: initializationSettingsIOS,
+        );
 
     await _notificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: (NotificationResponse response) {
-      },
+      onDidReceiveNotificationResponse: (NotificationResponse response) {},
     );
 
     await checkPermissionStatus();
@@ -73,14 +73,18 @@ class NotificationService {
       }
     } else if (Platform.isIOS) {
       final iosPlugin = _notificationsPlugin
-          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+          .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin
+          >();
 
       if (iosPlugin != null) {
-        final granted = await iosPlugin.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        ) ?? false;
+        final granted =
+            await iosPlugin.requestPermissions(
+              alert: true,
+              badge: true,
+              sound: true,
+            ) ??
+            false;
         _permissionStatus = granted
             ? NotificationPermissionStatus.granted
             : NotificationPermissionStatus.denied;
@@ -102,7 +106,9 @@ class NotificationService {
       }
     } else if (Platform.isIOS) {
       final iosPlugin = _notificationsPlugin
-          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+          .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin
+          >();
 
       if (iosPlugin != null) {
         final granted = await iosPlugin.requestPermissions(
@@ -128,7 +134,9 @@ class NotificationService {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: Row(
             children: [
               Icon(
@@ -152,10 +160,14 @@ class NotificationService {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withOpacity(0.3),
                   ),
                 ),
                 child: Row(
@@ -185,9 +197,11 @@ class NotificationService {
             FilledButton(
               onPressed: () async {
                 Navigator.of(context).pop();
-                final status = await notificationService.requestNotificationPermission();
+                final status = await notificationService
+                    .requestNotificationPermission();
 
-                if (status == NotificationPermissionStatus.permanentlyDenied && context.mounted) {
+                if (status == NotificationPermissionStatus.permanentlyDenied &&
+                    context.mounted) {
                   _showSettingsDialog(context);
                 }
               },
@@ -204,7 +218,9 @@ class NotificationService {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: const Text('Permission Required'),
           content: const Text(
             'Notifications have been disabled. To enable them, please go to your device settings and allow notifications for this app.',
@@ -227,60 +243,66 @@ class NotificationService {
     );
   }
 
- Future<bool> scheduleSubscriptionNotification(Subscription subscription) async {
-  if (_permissionStatus != NotificationPermissionStatus.granted) {
-    print('Cannot schedule notification: Permission not granted');
-    return false;
+  Future<bool> scheduleSubscriptionNotification(
+    Subscription subscription,
+  ) async {
+    if (_permissionStatus != NotificationPermissionStatus.granted) {
+      print('Cannot schedule notification: Permission not granted');
+      return false;
+    }
+    if (subscription.nextReminder == null) return false;
+    var nextReminder = subscription.nextReminder!;
+    while (nextReminder.isBefore(DateTime.now())) {
+      nextReminder = nextReminder.add(
+        Duration(days: subscription.intervalInDays),
+      );
+    }
+    final notificationTime = nextReminder.subtract(const Duration(days: 1));
+    if (notificationTime.isBefore(DateTime.now())) return false;
+    try {
+      const androidPlatformChannelSpecifics = AndroidNotificationDetails(
+        'subscription_channel',
+        'Subscription Renewals',
+        channelDescription: 'Notifications for upcoming subscription renewals',
+        importance: Importance.high,
+        priority: Priority.high,
+        showWhen: true,
+      );
+      const darwinPlatformChannelSpecifics = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+      final platformChannelSpecifics = NotificationDetails(
+        android: androidPlatformChannelSpecifics,
+        iOS: darwinPlatformChannelSpecifics,
+      );
+      await _notificationsPlugin.zonedSchedule(
+        subscription.id,
+        'Subscription Renewal',
+        'Your ${subscription.name} subscription renews tomorrow for \$${subscription.amount.toStringAsFixed(2)}',
+        tz.TZDateTime.from(notificationTime, tz.local),
+        platformChannelSpecifics,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      );
+      subscription.nextReminder = nextReminder;
+      await SubscriptionDatabase.isar.writeTxn(() async {
+        await SubscriptionDatabase.isar.subscriptions.put(subscription);
+      });
+      return true;
+    } catch (e) {
+      print('Failed to schedule notification: $e');
+      return false;
+    }
   }
-  if (subscription.nextReminder == null) return false;
-  var nextReminder = subscription.nextReminder!;
-  while (nextReminder.isBefore(DateTime.now())) {
-    nextReminder = nextReminder.add(Duration(days: subscription.intervalInDays));
-  }
-  final notificationTime = nextReminder.subtract(const Duration(days: 1));
-  if (notificationTime.isBefore(DateTime.now())) return false;
-  try {
-    const androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      'subscription_channel',
-      'Subscription Renewals',
-      channelDescription: 'Notifications for upcoming subscription renewals',
-      importance: Importance.high,
-      priority: Priority.high,
-      showWhen: true,
-    );
-    const darwinPlatformChannelSpecifics = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-    final platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-      iOS: darwinPlatformChannelSpecifics,
-    );
-    await _notificationsPlugin.zonedSchedule(
-      subscription.id,
-      'Subscription Renewal',
-      'Your ${subscription.name} subscription renews tomorrow for \$${subscription.amount.toStringAsFixed(2)}',
-      tz.TZDateTime.from(notificationTime, tz.local),
-      platformChannelSpecifics,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-    );
-    subscription.nextReminder = nextReminder.add(Duration(days: subscription.intervalInDays));
-    await SubscriptionDatabase.isar.writeTxn(() async {
-      await SubscriptionDatabase.isar.subscriptions.put(subscription);
-    });
-    return true;
-  } catch (e) {
-    print('Failed to schedule notification: $e');
-    return false;
-  }
-}
 
   Future<void> cancelSubscriptionNotification(int subscriptionId) async {
     await _notificationsPlugin.cancel(subscriptionId);
   }
 
-  Future<int> rescheduleAllNotifications(List<Subscription> subscriptions) async {
+  Future<int> rescheduleAllNotifications(
+    List<Subscription> subscriptions,
+  ) async {
     await _notificationsPlugin.cancelAll();
 
     if (_permissionStatus != NotificationPermissionStatus.granted) {
@@ -298,13 +320,14 @@ class NotificationService {
   }
 
   Future<int> getPendingNotificationsCount() async {
-    final pendingNotifications = await _notificationsPlugin.pendingNotificationRequests();
+    final pendingNotifications = await _notificationsPlugin
+        .pendingNotificationRequests();
     return pendingNotifications.length;
   }
 
   bool shouldPromptForPermission() {
     return _permissionStatus == NotificationPermissionStatus.denied ||
-           _permissionStatus == NotificationPermissionStatus.unknown;
+        _permissionStatus == NotificationPermissionStatus.unknown;
   }
 
   static Future<void> openAppSettings() async {

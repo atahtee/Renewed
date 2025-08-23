@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:renewed/database/notification_service.dart';
 import 'package:renewed/database/subscription.dart';
 import 'package:renewed/database/subscription_database.dart';
@@ -53,19 +54,22 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: const Text(
+          'My Subscriptions',
+          style: TextStyle(
+            color: Colors.black87,
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                Container(
-                  margin: const EdgeInsets.all(30),
-                  padding: const EdgeInsets.only(top: 20),
-                  child: Text('My Subscriptions', style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold
-                  ),),
-                ),
                 Container(
                   margin: const EdgeInsets.all(16),
                   padding: const EdgeInsets.all(20),
@@ -120,10 +124,7 @@ class _HomePageState extends State<HomePage> {
                           color: Colors.black87,
                         ),
                       ),
-                      TextButton(
-                        onPressed: () {},
-                        child: const Text('View All'),
-                      ),
+                      TextButton(onPressed: () {}, child: const Text(' All')),
                     ],
                   ),
                 ),
@@ -174,11 +175,23 @@ class _HomePageState extends State<HomePage> {
   Widget _buildSubscriptionCard(Subscription sub) {
     final icon = _getIconFor(sub.name);
     final color = _getColorFor(sub.name);
+
+    final nextReminder = sub.nextReminder ?? sub.startDate;
+    final now = DateTime.now();
     final daysRemaining =
-        sub.nextReminder?.difference(DateTime.now()).inDays ?? 0;
-    final dueText = daysRemaining <= 0
+        nextReminder.difference(now).inHours ~/ 24;
+    final dueText = daysRemaining < 0
+        ? 'Overdue'
+        : daysRemaining == 0
         ? 'Due Today'
-        : 'Due in $daysRemaining days';
+        : 'Due in $daysRemaining day${daysRemaining == 1 ? '' : 's'}';
+
+    final DateFormat dateFormat = DateFormat('MMM d, yyyy');
+    final dueDateText = 'Due: ${dateFormat.format(nextReminder)}';
+
+    if (daysRemaining < 0) {
+      _updateOverdueSubscription(sub);
+    }
 
     return GestureDetector(
       onLongPress: () => _confirmDelete(sub),
@@ -223,7 +236,15 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(height: 4),
                   Text(
                     dueText,
-                    style: const TextStyle(fontSize: 14, color: Colors.black54),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: daysRemaining < 0 ? Colors.red : Colors.black54,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    dueDateText,
+                    style: const TextStyle(fontSize: 12, color: Colors.black54),
                   ),
                 ],
               ),
@@ -240,6 +261,20 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  Future<void> _updateOverdueSubscription(Subscription sub) async {
+    var nextReminder = sub.nextReminder ?? sub.startDate;
+    while (nextReminder.isBefore(DateTime.now())) {
+      nextReminder = nextReminder.add(Duration(days: sub.intervalInDays));
+    }
+    if (nextReminder != sub.nextReminder) {
+      sub.nextReminder = nextReminder;
+      await db.updateReminder(
+        sub.id,
+      );
+      await loadSubscriptions(); 
+    }
   }
 
   void _confirmDelete(Subscription subscription) {

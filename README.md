@@ -8,7 +8,7 @@
 
 - **Subscription Management** – Add, edit, and organize your active subscriptions.
 - **Cost Tracking** – View your monthly or annual spending at a glance.
-- **Renewal Cycles** – Weekly, monthly, or yearly — you’ll always know what’s due and when.
+- **Renewal Cycles** – Weekly, monthly, or yearly — you’ll always know what’s and when.
 - **Smart Notifications** – Get timely reminders before renewals hit your wallet.
 - **Secure & Offline-First** – Your data stays private and accessible — even without an internet connection.
 
