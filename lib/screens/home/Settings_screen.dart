@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -120,7 +121,7 @@ class SettingsScreen extends StatelessWidget {
               ),
               _buildSettingsTile(
                 Icons.help,
-                'Help & Support',
+                'Help & ',
                 'Get help and contact support',
                 () {},
               ),
@@ -128,7 +129,7 @@ class SettingsScreen extends StatelessWidget {
                 Icons.privacy_tip,
                 'Privacy Policy',
                 'Read our privacy policy',
-                () {},
+                _openPrivacyPolicy,
               ),
             ]),
           ],
@@ -208,27 +209,42 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _rateApp() async {
-  final String packageName = "com.renewed.app";
+  Future<void> _openPrivacyPolicy() async {
+  final Uri url = Uri.parse("https://renewed-web.vercel.app/privacy");
 
-  final Uri playStoreUri = Uri.parse("market://details?id=$packageName");
-  final Uri webUri = Uri.parse("https://play.google.com/store/apps/details?id=$packageName");
-
-  if (await canLaunchUrl(playStoreUri)) {
-    await launchUrl(
-      playStoreUri,
-      mode: LaunchMode.externalNonBrowserApplication, // ✅ correct mode
-    );
-  } else {
-    await launchUrl(
-      webUri,
-      mode: LaunchMode.externalApplication,
-    );
+  if (!await launchUrl(
+    url,
+    mode: LaunchMode.externalApplication,
+  )) {
+    throw Exception('Could not launch $url');
   }
 }
 
+  Future<void> _rateApp() async {
+    final String packageName = "com.renewed.app";
 
-  void _shareApp() {
-    print('Share app functionality');
+    final Uri playStoreUri = Uri.parse("market://details?id=$packageName");
+    final Uri webUri = Uri.parse(
+      "https://play.google.com/store/apps/details?id=$packageName",
+    );
+
+    if (await canLaunchUrl(playStoreUri)) {
+      await launchUrl(
+        playStoreUri,
+        mode: LaunchMode.externalNonBrowserApplication,
+      );
+    } else {
+      await launchUrl(webUri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  Future<void> _shareApp() async {
+    const String appLink =
+        "https://play.google.com/store/apps/details?id=com.renewed.app";
+
+    await Share.share(
+      "Check out Renewed! Download it here: $appLink",
+      subject: "Renewed App",
+    );
   }
 }

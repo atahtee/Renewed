@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:renewed/database/notification_service.dart';
 import 'package:renewed/database/subscription.dart';
 import 'package:renewed/database/subscription_database.dart';
+import 'package:renewed/screens/home/Settings_screen.dart';
 import 'package:renewed/utils/add_subscription_sheet.dart';
 import 'package:renewed/utils/confirm_delete.dart';
 import 'package:renewed/utils/subscription_service.dart';
@@ -65,6 +66,17 @@ class _HomePageState extends State<HomePage> {
             fontWeight: FontWeight.w600,
           ),
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingsScreen()),
+              );
+            },
+            icon: const Icon(Icons.settings, color: Colors.black87),
+          ),
+        ],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -124,7 +136,9 @@ class _HomePageState extends State<HomePage> {
                           color: Colors.black87,
                         ),
                       ),
-                      TextButton(onPressed: () {}, child: const Text(' All')),
+                      // TextButton(onPressed: () {
+
+                      // }, child: const Text(' All')),
                     ],
                   ),
                 ),
@@ -178,8 +192,7 @@ class _HomePageState extends State<HomePage> {
 
     final nextReminder = sub.nextReminder ?? sub.startDate;
     final now = DateTime.now();
-    final daysRemaining =
-        nextReminder.difference(now).inHours ~/ 24;
+    final daysRemaining = nextReminder.difference(now).inHours ~/ 24;
     final dueText = daysRemaining < 0
         ? 'Overdue'
         : daysRemaining == 0
@@ -270,10 +283,8 @@ class _HomePageState extends State<HomePage> {
     }
     if (nextReminder != sub.nextReminder) {
       sub.nextReminder = nextReminder;
-      await db.updateReminder(
-        sub.id,
-      );
-      await loadSubscriptions(); 
+      await db.updateReminder(sub.id);
+      await loadSubscriptions();
     }
   }
 
